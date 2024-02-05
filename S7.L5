@@ -1,0 +1,72 @@
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv('dataset_climatico.csv')
+
+df.dropna(inplace=True)
+
+cols_to_normalize = ['temperatura_media', 'precipitazioni', 'umidita', 'velocita_vento']
+
+for col in cols_to_normalize:
+    mean = df[col].mean()
+    std = df[col].std()
+    df[col+'_zscore'] = (df[col] - mean) / std
+
+print(df.head())
+
+desc_stats = df.describe()
+
+print("Statistiche descrittive:")
+print(desc_stats)
+
+plt.figure(figsize=(12, 8))
+
+for i, col in enumerate(cols_to_normalize):
+    plt.subplot(2, 2, i+1)
+    sns.histplot(df[col+'_zscore'], kde=True)
+    plt.title(f'Distribuzione di {col}')
+
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(12, 8))
+
+for i, col in enumerate(cols_to_normalize):
+    plt.subplot(2, 2, i+1)
+    sns.boxplot(y=df[col+'_zscore'], orient='v')
+    plt.title(f'Box plot di {col}')
+
+plt.tight_layout()
+plt.show()
+
+corr_matrix = df[cols_to_normalize].corr()
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Matrice di Correlazione')
+plt.show()
+
+"""
+Distribuzione delle Variabili Normalizzate:
+La temperatura media presenta una distribuzione che va da -9.98 a 34.99, con una media di 12.61 e una deviazione standard di 13.29.
+Le precipitazioni variano da 0.00 a 19.97, con una media di 10.16 e una deviazione standard di 5.85.
+L umidita normalizzata ha una distribuzione che va da circa -1.76 a 1.71, con una media vicina a zero e una deviazione standard di 1.00.
+La velocita del vento varia da -1.68 a 1.83, con una media vicina a zero e una deviazione standard di 1.00.
+
+Correlazioni:
+Una heatmap della matrice di correlazione mostra le relazioni tra le variabili meteorologiche.
+Non sono evidenti correlazioni significative, ma possono emergere trend interessanti con analisi piu approfondite.
+
+Tendenze Osservate:
+La distribuzione della temperatura media sembra essere bilanciata, senza evidenti cluster significativi.
+Le precipitazioni non mostrano chiare tendenze, con una distribuzione uniforme.
+L umidita e la velocita del vento presentano distribuzioni simmetriche intorno alla media.
+
+Considerazioni Finali:
+Ulteriori analisi possono essere condotte per esplorare eventuali correlazioni stagionali o periodiche.
+La mancanza di correlazioni significative puo indicare una certa indipendenza tra le variabili meteorologiche nel dataset specifico.
+"""
+
